@@ -1,25 +1,20 @@
 import { useEffect, useState } from "react"
-import AnimeCard from "../../components/AnimeCard/AnimeCard"
+
 import { getTrendingAnime } from "../../api/animeApi"
 import type { Anime } from "../../types/anime"
+import AnimeSection from "../../components/AnimeSection/AnimeSection"
 
 function Home() {
   const [anime, setAnime] = useState<Anime[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+
   
   useEffect(() => {
   async function fetchAnime() {
     try {
-      setLoading(true)
-
       const data = await getTrendingAnime()
-
       setAnime(data)
     } catch (error) {
-      setError("Failed to load anime")
-    } finally {
-      setLoading(false)
+      console.log(error)
     }
   }
 
@@ -72,37 +67,9 @@ function Home() {
 
         </div>
       </section>
-      <section className="mx-auto max-w-6xl px-4 pb-20">
-        <h2 className="mb-6 text-2xl font-bold text-white">
-          Trending Anime
-        </h2>
 
-        {loading && (
-          <p className="text-slate-400">
-            Loading anime...
-          </p>
-        )}
+      <AnimeSection title="Trending Anime" anime={anime}/>
 
-        {error && (
-          <p className="text-red-400">
-            {error}
-          </p>
-        )}
-
-        {!loading && !error && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {anime.map((item) => (
-              <AnimeCard
-                key={item.id}
-                title={item.title}
-                image={item.image}
-                rating={item.rating}
-                episodes={item.episodes}
-              />
-            ))}
-          </div>
-        )}
-      </section>
     </main>
   )
 }
