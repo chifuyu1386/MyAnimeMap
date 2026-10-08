@@ -1,33 +1,44 @@
 import { useEffect, useState } from "react"
-import AnimeCard from "../../components/AnimeCard/AnimeCard"
-import { getTrendingAnime } from "../../api/animeApi"
+
+import { getTrendingAnime, getPopularAnime } from "../../api/animeApi"
 import type { Anime } from "../../types/anime"
+import AnimeSection from "../../components/AnimeSection/AnimeSection"
 
 function Home() {
-  const [anime, setAnime] = useState<Anime[]>([])
+  const [trendingAnime, setTrendingAnime] = useState<Anime[]>([])
+  const [popularAnime, setPopularAnime] = useState<Anime[]>([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  
+
   useEffect(() => {
-  async function fetchAnime() {
-    try {
-      setLoading(true)
+    async function fetchAnime() {
+      try {
+        setLoading(true)
+        setError("")
 
-      const data = await getTrendingAnime()
+        const [trending, popular] = await Promise.all([
+          getTrendingAnime(),
+          getPopularAnime(),
+        ])
 
-      setAnime(data)
-    } catch (error) {
-      setError("Failed to load anime")
-    } finally {
-      setLoading(false)
+        setTrendingAnime(trending)
+        setPopularAnime(popular)
+      } catch (error) {
+        console.error(error)
+        setError("Something went wrong while loading anime.")
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
-  fetchAnime()
+    fetchAnime()
   }, [])
 
   return (
     <main className="min-h-screen px-4 pb-20 pt-32">
+
+      {/* Hero */}
       <section className="mx-auto flex min-h-[70vh] max-w-6xl items-center">
         <div className="max-w-3xl">
 
@@ -72,37 +83,59 @@ function Home() {
 
         </div>
       </section>
-      <section className="mx-auto max-w-6xl px-4 pb-20">
-        <h2 className="mb-6 text-2xl font-bold text-white">
-          Trending Anime
-        </h2>
 
-        {loading && (
-          <p className="text-slate-400">
-            Loading anime...
-          </p>
-        )}
+      {loading && (
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur-xl">
 
-        {error && (
-          <p className="text-red-400">
-            {error}
-          </p>
-        )}
+            <div className="mx-auto mb-5 h-10 w-10 animate-spin rounded-full border-2 border-blue-400/20 border-t-blue-400" />
 
-        {!loading && !error && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {anime.map((item) => (
-              <AnimeCard
-                key={item.id}
-                title={item.title}
-                image={item.image}
-                rating={item.rating}
-                episodes={item.episodes}
-              />
-            ))}
+            <h2 className="text-lg font-semibold text-white">
+              Discovering anime...
+            </h2>
+
+            <p className="mt-2 text-sm text-slate-400">
+              We're fetching the latest anime for you.
+            </p>
+
           </div>
-        )}
-      </section>
+        </section>
+      )}
+
+      {!loading && error && (
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div className="rounded-2xl border border-red-400/20 bg-red-400/5 p-10 text-center backdrop-blur-xl">
+
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-red-400/20 bg-red-400/10 text-xl text-red-400">
+              !
+            </div>
+
+            <h2 className="text-lg font-semibold text-white">
+              Unable to load anime
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+              {error}
+            </p>
+
+          </div>
+        </section>
+      )}
+
+      {!loading && !error && (
+        <>
+          <AnimeSection
+            title="Trending Anime"
+            anime={trendingAnime}
+          />
+
+          <AnimeSection
+            title="Popular Anime"
+            anime={popularAnime}
+          />
+        </>
+      )}
+
     </main>
   )
 }
