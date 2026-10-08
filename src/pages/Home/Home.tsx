@@ -1,28 +1,44 @@
 import { useEffect, useState } from "react"
 
-import { getTrendingAnime } from "../../api/animeApi"
+import { getTrendingAnime, getPopularAnime } from "../../api/animeApi"
 import type { Anime } from "../../types/anime"
 import AnimeSection from "../../components/AnimeSection/AnimeSection"
 
 function Home() {
-  const [anime, setAnime] = useState<Anime[]>([])
+  const [trendingAnime, setTrendingAnime] = useState<Anime[]>([])
+  const [popularAnime, setPopularAnime] = useState<Anime[]>([])
 
-  
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
   useEffect(() => {
-  async function fetchAnime() {
-    try {
-      const data = await getTrendingAnime()
-      setAnime(data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
+    async function fetchAnime() {
+      try {
+        setLoading(true)
+        setError("")
 
-  fetchAnime()
+        const [trending, popular] = await Promise.all([
+          getTrendingAnime(),
+          getPopularAnime(),
+        ])
+
+        setTrendingAnime(trending)
+        setPopularAnime(popular)
+      } catch (error) {
+        console.error(error)
+        setError("Something went wrong while loading anime.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAnime()
   }, [])
 
   return (
     <main className="min-h-screen px-4 pb-20 pt-32">
+
+      {/* Hero */}
       <section className="mx-auto flex min-h-[70vh] max-w-6xl items-center">
         <div className="max-w-3xl">
 
@@ -68,7 +84,57 @@ function Home() {
         </div>
       </section>
 
-      <AnimeSection title="Trending Anime" anime={anime}/>
+      {loading && (
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur-xl">
+
+            <div className="mx-auto mb-5 h-10 w-10 animate-spin rounded-full border-2 border-blue-400/20 border-t-blue-400" />
+
+            <h2 className="text-lg font-semibold text-white">
+              Discovering anime...
+            </h2>
+
+            <p className="mt-2 text-sm text-slate-400">
+              We're fetching the latest anime for you.
+            </p>
+
+          </div>
+        </section>
+      )}
+
+      {!loading && error && (
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div className="rounded-2xl border border-red-400/20 bg-red-400/5 p-10 text-center backdrop-blur-xl">
+
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-red-400/20 bg-red-400/10 text-xl text-red-400">
+              !
+            </div>
+
+            <h2 className="text-lg font-semibold text-white">
+              Unable to load anime
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+              {error}
+            </p>
+
+          </div>
+        </section>
+      )}
+
+      {!loading && !error && (
+        <>
+          <AnimeSection
+            title="Trending Anime"
+            anime={trendingAnime}
+          />
+
+          <AnimeSection
+            title="Popular Anime"
+            anime={popularAnime}
+          />
+        </>
+      )}
 
     </main>
   )
