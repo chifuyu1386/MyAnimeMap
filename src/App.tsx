@@ -5,8 +5,11 @@ import AnimeDetails from "./pages/AnimeDetails/AnimeDetails"
 import Favorites from "./pages/Favorites/Favorites"
 import NotFound from "./pages/NotFound/NotFound"
 
+import Layout from "./components/Layout/Layout"
+
 function App () {
   return (
+    <Layout>
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/explore" element={<Explore/>}/>
@@ -14,6 +17,7 @@ function App () {
         <Route path="/favorites" element={<Favorites/>}/>
         <Route path="*" element={<NotFound/>}/>
       </Routes>
+    </Layout>
   )
 }
 
