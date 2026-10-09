@@ -36,7 +36,7 @@ function Home() {
   }, [])
 
   return (
-    <main className="min-h-screen px-4 pb-20 pt-32">
+    <main className="min-h-screen px-4 pb-20 pt-28">
 
       {/* Hero */}
       <section className="mx-auto flex min-h-[70vh] max-w-6xl items-center">
