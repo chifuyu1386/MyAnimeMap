@@ -65,3 +65,67 @@ export async function getPopularAnime(): Promise<Anime[]> {
     synopsis: anime.attributes.synopsis ?? undefined,
   }))
 }
+
+export type ExploreAnimeParams = {
+  search?: string
+  page?:number
+  limit?: number
+  sort?: string
+  status?: "current" | "finished" | "upcoming" | ""
+}
+
+export type ExploreAnimeResult = {
+  anime: Anime[]
+  total: number
+}
+
+export async function getExploreAnime({
+  search = "",
+  page = 1,
+  limit = 12,
+  sort = "-userCount",
+  status = "",
+} : ExploreAnimeParams = {}): Promise<ExploreAnimeResult> {
+  const params = new URLSearchParams()
+
+  params.set("page[limit]", String(limit))
+  params.set("page[offset]", String((page - 1) * limit))
+  params.set("sort", sort)
+
+  if (search.trim()) {
+    params.set("filter[text]", search.trim())
+  }
+
+  if (status) {
+    params.set("filter[status]", status.trim())
+  }
+
+  const response = await fetch(
+    `${API_URL}/anime?${params.toString()}`
+  )
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch anime")
+  }
+
+  const result: KitsuResponse & {
+    meta?: {
+       count?: number
+    }
+  } = await response.json()
+
+  const anime: Anime[] = result.data.map((item) => ({
+    id: item.id,
+    title: item.attributes.canonicalTitle,
+    image: item.attributes.posterImage?.large ?? "",
+    rating: item.attributes.averageRating ?? undefined,
+    episodes: item.attributes.episodeCount ?? undefined,
+    status: item.attributes.status ?? undefined,
+    synopsis: item.attributes.synopsis ?? undefined,
+  }))
+
+  return {
+    anime,
+    total: result.meta?.count ?? 0,
+  }
+}
