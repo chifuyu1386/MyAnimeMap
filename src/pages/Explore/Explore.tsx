@@ -14,6 +14,23 @@ function Explore() {
   const [error, setError] = useState("")
   const [status, setStatus] = useState<Status>("")
   const [sort, setSort] = useState("-userCount")
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+
+  const totalPages = Math.ceil(total / 10)
+
+  const visiblePages = Array.from(
+    {
+      length: Math.min(5, totalPages)
+    },
+    (_, index) => {
+      const startPage = Math.max(
+        1, 
+        Math.min(page-2, totalPages - 4)
+      )
+      return startPage + index
+    }
+  )
 
   useEffect(() => {
     async function fetchAnime() {
@@ -23,13 +40,14 @@ function Explore() {
 
         const result = await getExploreAnime({
           search: debouncedSearch,
-          page: 1,
+          page,
           limit: 10,
           status,
           sort,
         })
 
         setAnime(result.anime)
+        setTotal(result.total)
       } catch (err) {
         console.error(err)
         setError("We couldn't load anime. Please try again.")
@@ -39,7 +57,7 @@ function Explore() {
     }
 
     fetchAnime()
-  }, [debouncedSearch, status, sort])
+  }, [debouncedSearch, status, sort, page])
 
   return (
     <main className="min-h-screen px-4 pb-20 pt-32">
@@ -73,7 +91,10 @@ function Explore() {
               id="anime-search"
               type="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                setPage(1)
+              }}
               placeholder="Try Naruto, One Piece, Attack on Titan..."
               className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#050B18]/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/10"
             />
@@ -104,7 +125,10 @@ function Explore() {
             <select
               id="anime-status"
               value={status}
-              onChange={(event) => setStatus(event.target.value as Status)}
+              onChange={(event) => {
+                setStatus(event.target.value as Status)
+                setPage(1)
+              }}
               className="w-full rounded-xl border border-white/10 bg-[#050B18] px-4 py-3 text-white outline-none transition focus:border-blue-400/50"
             >
               <option value="">All statuses</option>
@@ -126,7 +150,10 @@ function Explore() {
             <select
               id="anime-sort"
               value={sort}
-              onChange={(event) => setSort(event.target.value)}
+              onChange={(event) => {
+                setSort(event.target.value)
+                setPage(1)
+              }}
               className="w-full rounded-xl border border-white/10 bg-[#050B18] px-4 py-3 text-white outline-none transition focus:border-blue-400/50"
             >
               <option value="-userCount">Most Popular</option>
@@ -196,6 +223,52 @@ function Explore() {
               />
             ))}
           </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && !error && totalPages > 1 && (
+          <nav
+            aria-label="Anime results pages"
+            className="mt-12 flex flex-wrap items-center justify-center gap-2"
+          >
+            {/* Previous Button */}
+            <button
+              type="button"
+              onClick={() => setPage((current) => current - 1)}
+              disabled={page === 1}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ← Previous
+            </button>
+
+            {/* Page Numbers */}
+            {visiblePages.map((pageNumber) => (
+              <button
+                key={pageNumber}
+                type="button"
+                onClick={() => setPage(pageNumber)}
+                aria-label={`Go to page ${pageNumber}`}
+                aria-current={page === pageNumber ? "page" : undefined}
+                className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-semibold transition ${
+                  page === pageNumber
+                    ? "border-blue-400/50 bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                    : "border-white/10 bg-white/5 text-slate-300 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
+                }`}
+              >
+                {pageNumber}
+              </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              disabled={page === totalPages}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </nav>
         )}
       </section>
     </main>
