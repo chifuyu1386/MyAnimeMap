@@ -72,13 +72,6 @@ function Home() {
               Explore Anime
             </a>
 
-            <a
-              href="/favorites"
-              className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 font-medium text-slate-200 backdrop-blur-md transition hover:bg-white/10"
-            >
-              View Favorites
-            </a>
-
           </div>
 
         </div>
