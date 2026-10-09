@@ -77,7 +77,7 @@ function AnimeDetails() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-20 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-22 sm:px-6 lg:px-8">
 
       {/* Cinematic Hero */}
       <section className="relative isolate overflow-hidden rounded-[28px] border border-white/10 bg-[#0A1120]">
