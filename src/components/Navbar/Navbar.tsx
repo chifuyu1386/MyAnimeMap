@@ -29,12 +29,6 @@ function Navbar() {
             Explore
           </Link>
 
-          <Link
-            to="/favorites"
-            className="transition-colors hover:text-blue-400"
-          >
-            Favorites
-          </Link>
         </div>
 
       </div>

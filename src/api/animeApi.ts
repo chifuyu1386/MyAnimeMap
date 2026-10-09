@@ -10,11 +10,21 @@ type KitsuAnime = {
     episodeCount: number | null
     status: string | null
     synopsis: string | null
+
     posterImage: {
       small: string
       medium: string
       large: string
     } | null
+
+    coverImage: {
+      small: string
+      large: string
+    } | null
+
+    startDate: string | null
+    endDate: string | null
+    ageRating: string | null
   }
 }
 
@@ -127,5 +137,33 @@ export async function getExploreAnime({
   return {
     anime,
     total: result.meta?.count ?? 0,
+  }
+}
+
+export async function getAnimeById(id: string): Promise<Anime> {
+  const response = await fetch(
+    `${API_URL}/anime/${id}`
+  )
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch anime details")
+  }
+
+  const result: {data: KitsuAnime} = await response.json()
+
+  const item = result.data
+
+  return {
+    id: item.id,
+    title: item.attributes.canonicalTitle,
+    image: item.attributes.posterImage?.large ?? "",
+    coverImage: item.attributes.coverImage?.large ?? undefined,
+    rating: item.attributes.averageRating ?? undefined,
+    episodes: item.attributes.episodeCount ?? undefined,
+    status: item.attributes.status ?? undefined,
+    synopsis: item.attributes.synopsis ?? undefined,
+    startDate: item.attributes.startDate ?? undefined,
+    endDate: item.attributes.endDate ?? undefined,
+    ageRating: item.attributes.ageRating ?? undefined,
   }
 }
