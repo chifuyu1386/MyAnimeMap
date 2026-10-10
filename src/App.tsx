@@ -13,6 +13,7 @@ function App () {
         <Route path="/" element={<Home/>}/>
         <Route path="/explore" element={<Explore/>}/>
         <Route path="/anime/:id" element={<AnimeDetails/>}/>
+        <Route path="*" element={<Home/>} />
       </Routes>
     </Layout>
   )
